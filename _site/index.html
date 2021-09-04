@@ -1,0 +1,53 @@
+<!doctype html>
+
+<html lang="lv">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>UGJKA.NET</title>
+    <meta name="description" content="Algas un izzāģēto bāku uzskaite">
+    <meta name="author" content="ugjka">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <style>
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            background: url(background.png);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100%;
+        }
+
+        .root {
+            margin-right: 3%;
+            margin-left: 3%;
+        }
+
+        @media only screen and (min-width: 500px) {
+            .root {
+                width: 400px;
+                margin-right: auto;
+                margin-left: auto;
+            }
+        }
+    </style>
+    <script type="module" , src="./elements.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+    </script>
+</head>
+
+<body>
+    <div class="root">
+        <counter-control></counter-control>
+    </div>
+</body>
+
+</html>

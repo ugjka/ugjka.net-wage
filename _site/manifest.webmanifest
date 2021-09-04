@@ -1,0 +1,15 @@
+{
+    "background_color": "#3ba3c8",
+    "description": "Algas un izzāģēto bāku uzskaite",
+    "display": "standalone",
+    "icons": [
+      {
+        "src": "./favicon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ],
+    "name": "Algas uzskaite",
+    "short_name": "Alga",
+    "start_url": "./"
+  }
