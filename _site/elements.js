@@ -49,6 +49,7 @@ Slim.element(
   <button id="new" @click="this.newDay()">Jauna Diena</button>
   <tank-counter *foreach={{this.data}} date={{item[0]}} count={{item[1]}}></tank-counter>
   <div id="total">Kopā nopelnīts: {{this.total}}€</div>
+  <button @click="this.nukeAll()">Dzēst visu</button>
   <style>
     button {
       height: 35px;
@@ -95,6 +96,15 @@ Slim.element(
       el.setAttribute("count", "0");
       let but = document.getElementById("new");
       but.parentNode.insertBefore(el, but.nextSibling);
+    }
+    nukeAll() {
+      if (confirm("Vai tiešām dzēst visu?")) {
+        for (let i = counters.length; i > 0; i--) {
+          this.children[i].remove();
+        }
+      }
+      counters = [];
+      document.dispatchEvent(saveEvent);
     }
   }
 )
