@@ -103,6 +103,9 @@ Slim.element(
     lock() {
       document.dispatchEvent(lockEvent);
       this.locked = !this.locked;
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
     }
 
     updateTotal() {
