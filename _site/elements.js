@@ -17,6 +17,9 @@ const disableButtonsEvent = new Event('disable');
 document.addEventListener('save', () => {
   localStorage.setObject("wage", counters);
   document.dispatchEvent(calculateTotalEvent);
+  if (navigator.vibrate) {
+    navigator.vibrate(100);
+  }
 });
 
 var counters = [];
