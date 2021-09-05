@@ -12,6 +12,7 @@ Storage.prototype.getObject = function (key) {
 
 const saveEvent = new Event('save');
 const totalEvent = new Event('update');
+const disableEvent = new Event('disable');
 
 document.addEventListener('save', () => {
   localStorage.setObject("wage", counters);
@@ -81,6 +82,7 @@ Slim.element(
       document.addEventListener("update", () => { this.updateTotal(); });
       this.updateTotal();
     }
+
     updateTotal() {
       let counter = 0;
       counters.forEach((v) => { counter += v[1] });
@@ -96,6 +98,7 @@ Slim.element(
       el.setAttribute("count", "0");
       let but = document.getElementById("new");
       but.parentNode.insertBefore(el, but.nextSibling);
+      document.dispatchEvent(disableEvent);
     }
     nukeAll() {
       if (confirm("Vai tiešām dzēst visu?")) {
@@ -114,9 +117,9 @@ Slim.element(
   `<div>   
       <button @click="this.nuke()">X</button>
       <span>{{this.date}}</span>
-      <button @click="this.sub()"> - </button>
+      <button #ref="minus" @click="this.sub()"> - </button>
       <span>{{this.count}}</span>
-      <button @click="this.add()"> + </button>
+      <button #ref="plus" @click="this.add()"> + </button>
     </div>
     <style>
       div {
@@ -143,6 +146,25 @@ Slim.element(
     onCreated() {
       this.date = this.getAttribute("date");
       this.count = this.getAttribute("count");
+      document.addEventListener("disable", () => {
+        if (this.parentNode) {
+          this.disableButton();
+        }
+      });
+    }
+
+    disableButton() {
+      if (this.id() > 0) {
+        this.plus.setAttribute("disabled", "");
+        this.minus.setAttribute("disabled", "");
+      } else {
+        this.plus.removeAttribute("disabled");
+        this.minus.removeAttribute("disabled");
+      }
+    }
+
+    onRender() {
+      this.disableButton();
     }
 
     add() {
@@ -160,6 +182,7 @@ Slim.element(
         deleteCounter(this.id());
         this.remove();
         document.dispatchEvent(saveEvent);
+        document.dispatchEvent(disableEvent);
       }
     }
     id() {
