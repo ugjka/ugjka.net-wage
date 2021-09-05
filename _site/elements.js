@@ -10,13 +10,13 @@ Storage.prototype.getObject = function (key) {
   return value && JSON.parse(value);
 }
 
-const saveEvent = new Event('save');
-const totalEvent = new Event('update');
-const disableEvent = new Event('disable');
+const saveDataEvent = new Event('save');
+const calculateTotalEvent = new Event('calculate');
+const disableButtonsEvent = new Event('disable');
 
 document.addEventListener('save', () => {
   localStorage.setObject("wage", counters);
-  document.dispatchEvent(totalEvent);
+  document.dispatchEvent(calculateTotalEvent);
 });
 
 var counters = [];
@@ -47,10 +47,6 @@ function getDayOfWeek() {
 Slim.element(
   'counter-control',
   `
-  <button id="new" @click="this.newDay()">Jauna Diena</button>
-  <tank-counter *foreach={{this.data}} date={{item[0]}} count={{item[1]}}></tank-counter>
-  <div id="total">Kopā nopelnīts: {{this.total}}€</div>
-  <button @click="this.nukeAll()">Dzēst visu</button>
   <style>
     button {
       height: 35px;
@@ -64,63 +60,67 @@ Slim.element(
       margin: 10px;
     }
   </style>
+  <div>
+    <button id="new" @click="this.newDay()">Jauna Diena</button>
+    <slot></slot>
+    <div id="total">Kopā nopelnīts: {{this.total}}€</div>
+    <button @click="this.nukeAll()">Dzēst visu</button>
+  </div>
   `,
   class CounterControl extends Slim {
     constructor() {
       super();
       this.total = 0;
     }
-    static get useShadow() {
-      return false;
-    }
+
     onCreated() {
-      let stor = localStorage.getObject("wage");
-      if (stor) {
-        counters = stor;
-        this.data = counters;
+      counters = localStorage.getObject("wage");
+      if (!counters) {
+        counters = [];
       }
-      document.addEventListener("update", () => { this.updateTotal(); });
+      document.addEventListener("calculate", () => { this.updateTotal(); });
       this.updateTotal();
+      counters.forEach((v) => {
+        let el = document.createElement("tank-counter");
+        el.setAttribute("date", v[0]);
+        el.setAttribute("count", v[1]);
+        this.append(el);
+      });
     }
 
     updateTotal() {
-      let counter = 0;
-      counters.forEach((v) => { counter += v[1] });
-      let money = counter * 3.5;
-      this.total = counter + " x 3.50€ = " + money;
+      let sum = 0;
+      counters.forEach((v) => { sum += v[1] });
+      let money = sum * 3.5;
+      this.total = `${sum} x 3.50€ = ${money}`;
     }
+
     newDay() {
-      let today = new Date().toISOString().slice(5, 10) + " " + getDayOfWeek();
+      let today = `${new Date().toISOString().slice(5, 10)} ${getDayOfWeek()}`;
       counters = [[today, 0], ...counters];
-      document.dispatchEvent(saveEvent);
+      document.dispatchEvent(saveDataEvent);
       let el = document.createElement("tank-counter");
       el.setAttribute("date", today);
       el.setAttribute("count", "0");
-      let but = document.getElementById("new");
-      but.parentNode.insertBefore(el, but.nextSibling);
-      document.dispatchEvent(disableEvent);
+      this.prepend(el);
+      document.dispatchEvent(disableButtonsEvent);
     }
+
     nukeAll() {
       if (confirm("Vai tiešām dzēst visu?")) {
-        for (let i = counters.length; i > 0; i--) {
+        for (let i = counters.length - 1; i >= 0; i--) {
           this.children[i].remove();
         }
       }
       counters = [];
-      document.dispatchEvent(saveEvent);
+      document.dispatchEvent(saveDataEvent);
     }
   }
 )
 
 Slim.element(
   'tank-counter',
-  `<div>   
-      <button @click="this.nuke()">X</button>
-      <span>{{this.date}}</span>
-      <button #ref="minus" @click="this.sub()"> - </button>
-      <span>{{this.count}}</span>
-      <button #ref="plus" @click="this.add()"> + </button>
-    </div>
+  `
     <style>
       div {
         display: flex;
@@ -138,11 +138,19 @@ Slim.element(
         height: 40px;
       }
     </style>
+    <div>   
+      <button @click="this.nuke()">X</button>
+      <span>{{this.date}}</span>
+      <button #ref="minus" @click="this.sub()"> - </button>
+      <span>{{this.count}}</span>
+      <button #ref="plus" @click="this.add()"> + </button>
+    </div>
     `,
   class TankCounter extends Slim {
     constructor() {
       super();
     }
+
     onCreated() {
       this.date = this.getAttribute("date");
       this.count = this.getAttribute("count");
@@ -170,23 +178,26 @@ Slim.element(
     add() {
       this.count++;
       updateCounter(this.id(), this.count);
-      document.dispatchEvent(saveEvent);
+      document.dispatchEvent(saveDataEvent);
     }
+
     sub() {
       this.count--;
       updateCounter(this.id(), this.count);
-      document.dispatchEvent(saveEvent);
+      document.dispatchEvent(saveDataEvent);
     }
+
     nuke() {
       if (confirm("Vai tiešām dzēst?")) {
         deleteCounter(this.id());
         this.remove();
-        document.dispatchEvent(saveEvent);
-        document.dispatchEvent(disableEvent);
+        document.dispatchEvent(saveDataEvent);
+        document.dispatchEvent(disableButtonsEvent);
       }
     }
+
     id() {
-      return [...this.parentNode.children].indexOf(this) - 1;
+      return [...this.parentNode.children].indexOf(this);
     }
   }
 );
