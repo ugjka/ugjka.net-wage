@@ -13,7 +13,8 @@ Storage.prototype.getObject = function (key) {
 const saveDataEvent = new Event('save');
 const calculateTotalEvent = new Event('calculate');
 const disableButtonsEvent = new Event('disable');
-const lockEvent = new Event('lock');
+const lockEvent = new CustomEvent('lock', { detail: true });
+const unlockEvent = new CustomEvent('lock', { detail: false });
 
 document.addEventListener('save', () => {
   localStorage.setObject("wage", counters);
@@ -101,8 +102,13 @@ Slim.element(
     }
 
     lock() {
-      document.dispatchEvent(lockEvent);
-      this.locked = !this.locked;
+      if(this.locked){
+        document.dispatchEvent(unlockEvent);
+        this.locked = false;
+      } else{
+        document.dispatchEvent(lockEvent);
+        this.locked = true;
+      }
       if (navigator.vibrate) {
         navigator.vibrate(100);
       }
@@ -123,8 +129,9 @@ Slim.element(
       el.setAttribute("date", today);
       el.setAttribute("count", "0");
       this.prepend(el);
-      document.dispatchEvent(disableButtonsEvent);
-
+      if (this.locked){
+        document.dispatchEvent(disableButtonsEvent);
+      }
     }
 
     nukeAll() {
@@ -177,20 +184,17 @@ Slim.element(
       this.date = this.getAttribute("date");
       this.count = this.getAttribute("count");
       document.addEventListener("disable", () => {
-        if (this.parentNode) {
+        if (this.locked) {
           this.disableButton();
         }
       });
-      document.addEventListener("lock", () => {
-        if (!this.parentNode){
-          return
-        }
-        if (this.locked) {
-          this.locked = false;
-          this.unlock();
-        } else {
-          this.locked = true;
+      document.addEventListener("lock", (e) => {
+        if (e.detail){
+          this.locked = true
           this.disableButton();
+        } else{
+          this.unlock();
+          this.locked = false;
         }
       });
     }
@@ -231,11 +235,16 @@ Slim.element(
         deleteCounter(this.id());
         this.remove();
         document.dispatchEvent(saveDataEvent);
-        document.dispatchEvent(disableButtonsEvent);
+        if (this.locked){
+          document.dispatchEvent(disableButtonsEvent);
+        }
       }
     }
 
     id() {
+      if (this.parentNode == null){
+        return 0;
+      }
       return [...this.parentNode.children].indexOf(this);
     }
   }
