@@ -13,6 +13,7 @@ Storage.prototype.getObject = function (key) {
 const saveDataEvent = new Event('save');
 const calculateTotalEvent = new Event('calculate');
 const disableButtonsEvent = new Event('disable');
+const lockEvent = new Event('lock');
 
 document.addEventListener('save', () => {
   localStorage.setObject("wage", counters);
@@ -62,18 +63,26 @@ Slim.element(
       padding: 10px;
       margin: 10px;
     }
+    #footer {
+      display: flex;
+      justify-content: space-between;
+    }
   </style>
   <div>
     <button id="new" @click="this.newDay()">Jauna Diena</button>
     <slot></slot>
     <div id="total">Kopā nopelnīts: {{this.total}}€</div>
-    <button @click="this.nukeAll()">Dzēst visu</button>
+    <div id="footer">
+      <button @click="this.nukeAll()">Dzēst visu</button>
+      <button @click="this.lock()">{{this.locked ? "Atsēgt" : "Slēgt"}}</button>
+    </div>
   </div>
   `,
   class CounterControl extends Slim {
     constructor() {
       super();
       this.total = 0;
+      this.locked = true;
     }
 
     onCreated() {
@@ -89,6 +98,11 @@ Slim.element(
         el.setAttribute("count", v[1]);
         this.append(el);
       });
+    }
+
+    lock() {
+      document.dispatchEvent(lockEvent);
+      this.locked = !this.locked;
     }
 
     updateTotal() {
@@ -107,6 +121,7 @@ Slim.element(
       el.setAttribute("count", "0");
       this.prepend(el);
       document.dispatchEvent(disableButtonsEvent);
+
     }
 
     nukeAll() {
@@ -152,6 +167,7 @@ Slim.element(
   class TankCounter extends Slim {
     constructor() {
       super();
+      this.locked = true;
     }
 
     onCreated() {
@@ -162,6 +178,23 @@ Slim.element(
           this.disableButton();
         }
       });
+      document.addEventListener("lock", () => {
+        if (!this.parentNode){
+          return
+        }
+        if (this.locked) {
+          this.locked = false;
+          this.unlock();
+        } else {
+          this.locked = true;
+          this.disableButton();
+        }
+      });
+    }
+
+    unlock() {
+      this.plus.removeAttribute("disabled");
+      this.minus.removeAttribute("disabled");
     }
 
     disableButton() {
