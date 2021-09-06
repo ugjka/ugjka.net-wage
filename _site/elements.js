@@ -75,7 +75,7 @@ Slim.element(
     <div id="total">Kopā nopelnīts: {{this.total}}€</div>
     <div id="footer">
       <button @click="this.nukeAll()">Dzēst visu</button>
-      <button @click="this.lock()">{{this.locked ? "Atsēgt" : "Slēgt"}}</button>
+      <button @click="this.lock()">{{this.locked ? "Atslēgt" : "Slēgt"}}</button>
     </div>
   </div>
   `,
