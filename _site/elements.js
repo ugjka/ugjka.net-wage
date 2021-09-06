@@ -80,6 +80,7 @@ Slim.element(
   </div>
   `,
   class CounterControl extends Slim {
+
     constructor() {
       super();
       this.total = 0;
@@ -165,10 +166,13 @@ Slim.element(
         width: 40px;
         height: 40px;
       }
+      .date {
+        flex-basis: 45%;
+      }
     </style>
     <div>   
       <button @click="this.nuke()">X</button>
-      <span>{{this.date}}</span>
+      <span class="date">{{this.date}}</span>
       <button #ref="minus" @click="this.sub()"> - </button>
       <span>{{this.count}}</span>
       <button #ref="plus" @click="this.add()"> + </button>
