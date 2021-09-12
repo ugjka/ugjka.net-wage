@@ -163,10 +163,10 @@ Slim.element(
         for (let i = counters.length - 1; i >= 0; i--) {
           this.children[i].remove();
         }
+        this.addHistory();
+        counters = [];
+        document.dispatchEvent(saveDataEvent);
       }
-      this.addHistory();
-      counters = [];
-      document.dispatchEvent(saveDataEvent);
     }
   }
 )
