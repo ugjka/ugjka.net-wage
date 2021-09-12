@@ -57,7 +57,7 @@ Slim.element(
       height: 35px;
       margin: 15px;
     }
-    #total {
+    #total, .history {
       background: white;
       border-style: solid;
       border-width: 1px;
@@ -76,6 +76,9 @@ Slim.element(
     <div id="footer">
       <button @click="this.nukeAll()">Dzēst visu</button>
       <button @click="this.lock()">{{this.locked ? "Atslēgt" : "Slēgt"}}</button>
+    </div>
+    <div class="history" *foreach={{this.history}}>
+      {{item}}
     </div>
   </div>
   `,
@@ -100,13 +103,18 @@ Slim.element(
         el.setAttribute("count", v[1]);
         this.append(el);
       });
+      let history = localStorage.getObject("wagehist");
+      if (!history){
+        this.history = [];
+      }
+      this.history = history;
     }
 
     lock() {
-      if(this.locked){
+      if (this.locked) {
         document.dispatchEvent(unlockEvent);
         this.locked = false;
-      } else{
+      } else {
         document.dispatchEvent(lockEvent);
         this.locked = true;
       }
@@ -130,9 +138,24 @@ Slim.element(
       el.setAttribute("date", today);
       el.setAttribute("count", "0");
       this.prepend(el);
-      if (this.locked){
+      if (this.locked) {
         document.dispatchEvent(disableButtonsEvent);
       }
+    }
+
+    addHistory() {
+      let today = `${new Date().toISOString().slice(0, 10)}`
+      let sum = 0;
+      counters.forEach((v) => { sum += v[1] });
+      let money = sum * 3.5;
+      let newhist = `${today}: ${sum} x 3.50€ = ${money}€`;
+      let history = localStorage.getObject("wagehist");
+      if (!history){
+        history = [];
+      }
+      history = [newhist, ...history];
+      localStorage.setObject("wagehist", history);
+      this.history = history;
     }
 
     nukeAll() {
@@ -141,6 +164,7 @@ Slim.element(
           this.children[i].remove();
         }
       }
+      this.addHistory();
       counters = [];
       document.dispatchEvent(saveDataEvent);
     }
@@ -193,10 +217,10 @@ Slim.element(
         }
       });
       document.addEventListener("lock", (e) => {
-        if (e.detail){
+        if (e.detail) {
           this.locked = true
           this.disableButton();
-        } else{
+        } else {
           this.unlock();
           this.locked = false;
         }
@@ -239,14 +263,14 @@ Slim.element(
         deleteCounter(this.id());
         this.remove();
         document.dispatchEvent(saveDataEvent);
-        if (this.locked){
+        if (this.locked) {
           document.dispatchEvent(disableButtonsEvent);
         }
       }
     }
 
     id() {
-      if (this.parentNode == null){
+      if (this.parentNode == null) {
         return 0;
       }
       return [...this.parentNode.children].indexOf(this);
