@@ -80,7 +80,7 @@ Slim.element(
     <div class="history" *foreach={{this.history}}>
       {{item}}
     </div>
-    <div class="history">Kopā pavisam: {{this.historyTotal}}€</div>
+    <div class="history">Kopā pavisam: {{this.historyTotalCur}}€</div>
   </div>
   `,
   class CounterControl extends Slim {
@@ -97,7 +97,6 @@ Slim.element(
         counters = [];
       }
       document.addEventListener("calculate", () => { this.updateTotal(); });
-      this.updateTotal();
       counters.forEach((v) => {
         let el = document.createElement("tank-counter");
         el.setAttribute("date", v[0]);
@@ -115,7 +114,9 @@ Slim.element(
         this.historyTotal = 0;
       } else {
         this.historyTotal = historyTotal;
+        this.historyTotalCur = historyTotal;
       }
+      this.updateTotal();
     }
 
     lock() {
@@ -136,6 +137,7 @@ Slim.element(
       counters.forEach((v) => { sum += v[1] });
       let money = sum * 3.5;
       this.total = `${sum} x 3.50€ = ${money}`;
+      this.historyTotalCur = this.historyTotal + money;
     }
 
     newDay() {
