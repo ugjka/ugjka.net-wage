@@ -80,6 +80,7 @@ Slim.element(
     <div class="history" *foreach={{this.history}}>
       {{item}}
     </div>
+    <div class="history">Kopā pavisam: {{this.historyTotal}}€</div>
   </div>
   `,
   class CounterControl extends Slim {
@@ -104,10 +105,17 @@ Slim.element(
         this.append(el);
       });
       let history = localStorage.getObject("wagehist");
-      if (!history){
+      if (!history) {
         this.history = [];
+      } else {
+        this.history = history;
       }
-      this.history = history;
+      let historyTotal = localStorage.getObject("wagetotal");
+      if (!historyTotal) {
+        this.historyTotal = 0;
+      } else {
+        this.historyTotal = historyTotal;
+      }
     }
 
     lock() {
@@ -150,12 +158,14 @@ Slim.element(
       let money = sum * 3.5;
       let newhist = `${today}: ${sum} x 3.50€ = ${money}€`;
       let history = localStorage.getObject("wagehist");
-      if (!history){
+      if (!history) {
         history = [];
       }
       history = [newhist, ...history];
       localStorage.setObject("wagehist", history);
       this.history = history;
+      this.historyTotal += money;
+      localStorage.setObject("wagetotal", this.historyTotal);
     }
 
     nukeAll() {
@@ -208,23 +218,34 @@ Slim.element(
       this.locked = true;
     }
 
+    disableListener = e => {
+      console.log("disableListener");
+      if (this.locked) {
+        this.disableButton();
+      }
+    }
+
+    lockListener = e => {
+      console.log("lockListener")
+      if (e.detail) {
+        this.locked = true
+        this.disableButton();
+      } else {
+        this.unlock();
+        this.locked = false;
+      }
+    }
+
     onCreated() {
       this.date = this.getAttribute("date");
       this.count = this.getAttribute("count");
-      document.addEventListener("disable", () => {
-        if (this.locked) {
-          this.disableButton();
-        }
-      });
-      document.addEventListener("lock", (e) => {
-        if (e.detail) {
-          this.locked = true
-          this.disableButton();
-        } else {
-          this.unlock();
-          this.locked = false;
-        }
-      });
+      document.addEventListener("disable", this.disableListener);
+      document.addEventListener("lock", this.lockListener);
+    }
+
+    onRemoved() {
+      document.removeEventListener("disable", this.disableListener);
+      document.removeEventListener("lock", this.lockListener);
     }
 
     unlock() {
@@ -270,9 +291,6 @@ Slim.element(
     }
 
     id() {
-      if (this.parentNode == null) {
-        return 0;
-      }
       return [...this.parentNode.children].indexOf(this);
     }
   }
