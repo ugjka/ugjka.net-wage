@@ -70,7 +70,7 @@ Slim.element(
     }
   </style>
   <div>
-    <button id="new" @click="this.newDay()">Jauna Diena</button>
+    <button id="new" @click="this.newDay()">Jauna Diena ({{this.days}})</button>
     <slot></slot>
     <div id="total">Kopā nopelnīts: {{this.total}}€</div>
     <div id="footer">
@@ -96,6 +96,7 @@ Slim.element(
       if (!counters) {
         counters = [];
       }
+      this.days = counters.length
       document.addEventListener("calculate", () => { this.updateTotal(); });
       counters.forEach((v) => {
         let el = document.createElement("tank-counter");
@@ -133,6 +134,7 @@ Slim.element(
     }
 
     updateTotal() {
+      this.days = counters.length
       let sum = 0;
       counters.forEach((v) => { sum += v[1] });
       let money = sum * 3.5;
@@ -141,6 +143,7 @@ Slim.element(
     }
 
     newDay() {
+      this.days++
       let today = `${new Date().toISOString().slice(5, 10)} ${getDayOfWeek()}`;
       counters = [[today, 0], ...counters];
       document.dispatchEvent(saveDataEvent);
@@ -176,6 +179,7 @@ Slim.element(
           this.children[i].remove();
         }
         this.addHistory();
+        this.days = 0;
         counters = [];
         document.dispatchEvent(saveDataEvent);
       }
@@ -221,14 +225,12 @@ Slim.element(
     }
 
     disableListener = e => {
-      console.log("disableListener");
       if (this.locked) {
         this.disableButton();
       }
     }
 
     lockListener = e => {
-      console.log("lockListener")
       if (e.detail) {
         this.locked = true
         this.disableButton();
