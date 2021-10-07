@@ -56,6 +56,8 @@ Slim.element(
     button {
       height: 35px;
       margin: 15px;
+      border-radius: 5px;
+      border: 2px solid gray;
     }
     #total, .history {
       background: white;
@@ -63,6 +65,7 @@ Slim.element(
       border-width: 1px;
       padding: 10px;
       margin: 10px;
+      border-radius: 5px;
     }
     #footer {
       display: flex;
@@ -201,10 +204,13 @@ Slim.element(
         padding: 10px;
         margin: 10px;
         background: white;
+        border-radius: 5px;
       }
       button {
         width: 40px;
         height: 40px;
+        border-radius: 50%;
+        border: 2px solid gray;
       }
       .date {
         flex-basis: 45%;
