@@ -15,6 +15,7 @@ const calculateTotalEvent = new Event('calculate');
 const disableButtonsEvent = new Event('disable');
 const lockEvent = new CustomEvent('lock', { detail: true });
 const unlockEvent = new CustomEvent('lock', { detail: false });
+const Hrate = 5;
 
 document.addEventListener('save', () => {
   localStorage.setObject("wage", counters);
@@ -140,8 +141,8 @@ Slim.element(
       this.days = counters.length
       let sum = 0;
       counters.forEach((v) => { sum += v[1] });
-      let money = sum * 3.5;
-      this.total = `${sum} x 3.50€ = ${money}`;
+      let money = sum * Hrate;
+      this.total = `${sum} x ${Hrate}€ = ${money}`;
       this.historyTotalCur = this.historyTotal + money;
     }
 
@@ -163,8 +164,8 @@ Slim.element(
       let today = `${new Date().toISOString().slice(0, 10)}`
       let sum = 0;
       counters.forEach((v) => { sum += v[1] });
-      let money = sum * 3.5;
-      let newhist = `${today}: ${sum} x 3.50€ = ${money}€`;
+      let money = sum * Hrate;
+      let newhist = `${today}: ${sum} x ${Hrate}€ = ${money}€`;
       let history = localStorage.getObject("wagehist");
       if (!history) {
         history = [];
