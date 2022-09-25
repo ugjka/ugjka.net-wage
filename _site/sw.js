@@ -14,14 +14,14 @@
 // Names of the two caches used in this version of the service worker.
 // Change to v2, etc. when you update any of the local resources, which will
 // in turn trigger the install event again.
-const PRECACHE = 'precache-v222222';
+const PRECACHE = 'precache-v2222222';
 const RUNTIME = 'runtime';
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = [
     './',
     './elements.js',
-    './background.png',
+    './background.jpg',
     './favicon-192x192.png',
     './slim-js/index.js',
     './slim-js/decorators.js',
